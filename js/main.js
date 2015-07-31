@@ -1,10 +1,16 @@
-var stage, fondo;
+var stage, fondo, grupoAssets;
 var keyboard = {};
 var intv;
 var personaje;
 var grav = 0.8;
 var val_reb = 0;
 
+
+
+grupoAssets = new Kinetic.Group({
+	x:0,
+	y:0
+});
 
 stage = new Kinetic.Stage({
 	container: 'game',
@@ -15,12 +21,32 @@ stage = new Kinetic.Stage({
 
 function nivelUno(){
 	fondo = new Kinetic.Layer();
+
+	/*Enemigos*/
+	grupoAssets.add(new Enemigo(200, stage.getHeight()-75));
+	grupoAssets.add(new Enemigo(850, stage.getHeight()/3.9-60));
+	grupoAssets.add(new Enemigo(170, stage.getHeight()/3-60));
+	grupoAssets.add(new Enemigo(1020, stage.getHeight() -75));
+	grupoAssets.add(new Enemigo(1120, stage.getHeight() -75));
+	grupoAssets.add(new Enemigo(1220, stage.getHeight() -75));
+
+
+	/*Plataformas*/
+	var piso = new Plataforma(0, stage.getHeight()-15);
+	piso.setWidth(stage.getWidth() * 2);
+	grupoAssets.add(piso); 
+	grupoAssets.add(new Plataforma(20, stage.getHeight()/1.5));
+	//grupoAssets.add(new Plataforma(190, stage.attrs.height/3));
+	grupoAssets.add(new Plataforma(190, stage.getHeight()/3));
+
+
 	personaje = new Heroe();
 	personaje.setX(0);
 	personaje.setY(stage.getHeight()-personaje.getHeight());//Se resta al alto del canvas el alto del personaje
 	personaje.limiteDer = stage.getWidth()-personaje.getWidth();
 	personaje.limiteTope = stage.getHeight();
 	fondo.add(personaje);
+	fondo.add(grupoAssets); //agregar enemigos
 	stage.add(fondo);
 }
 
@@ -104,6 +130,23 @@ function hit(a,b){
 	return hit;	
 } 
 
+
+
+function moverEnemigos()
+{
+	var enemigos = grupoAssets.children;
+
+	for (i in enemigos)
+	{
+		var enemigo = enemigos[i];
+
+		if (enemigo instanceof Enemigo)
+		{
+		   enemigo.mover(); 
+		}
+	}
+}
+
 function aplicarFuerzas()
 {
 	personaje.aplicarGravedad(grav, val_reb);
@@ -119,5 +162,6 @@ function frameLoop ()
 {
 	aplicarFuerzas();
 	moverPersonaje();
+	moverEnemigos();
 	stage.draw();
 }

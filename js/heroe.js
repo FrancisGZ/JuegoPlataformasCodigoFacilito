@@ -1,6 +1,6 @@
 function	Heroe(){
 
-	Kinetic.Rect.call(this);
+	Kinetic.Rect.call(this); //Constructor de la clase heredada
 	
 	this.setWidth(40);
 	this.setHeight(70);
@@ -54,4 +54,4 @@ function	Heroe(){
 }    
 
 
-Heroe.prototype = Object.create(Kinetic.Rect.prototype);
+Heroe.prototype = Object.create(Kinetic.Rect.prototype); //Herencia de la clase create de kinetic js
