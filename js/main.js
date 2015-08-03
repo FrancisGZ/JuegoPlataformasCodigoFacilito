@@ -1,9 +1,10 @@
-var stage, fondo, grupoAssets;
+	var stage, fondo, grupoAssets;
 var keyboard = {};
 var intv;
 var personaje;
 var grav = 0.8;
-var val_reb = 0;
+var val_reb = 0; //Calor de rebote valor negativo para agregar rebote
+var juego = new Game() ;
 
 
 
@@ -20,14 +21,17 @@ stage = new Kinetic.Stage({
 });  
 
 function nivelUno(){
+	
+	juego.puntaje=0;
+
 	fondo = new Kinetic.Layer();
 
 	/*Enemigos*/
 	grupoAssets.add(new Enemigo(200, stage.getHeight()-75));
 	grupoAssets.add(new Enemigo(850, stage.getHeight()/3.9-60));
 	grupoAssets.add(new Enemigo(170, stage.getHeight()/3-60));
-	grupoAssets.add(new Enemigo(1020, stage.getHeight() -75));
-	grupoAssets.add(new Enemigo(1120, stage.getHeight() -75));
+	grupoAssets.add(new Enemigo(800, stage.getHeight()-75));
+	grupoAssets.add(new Enemigo(1120, stage.getHeight()-75));
 	grupoAssets.add(new Enemigo(1220, stage.getHeight() -75));
 
 
@@ -38,7 +42,8 @@ function nivelUno(){
 	grupoAssets.add(new Plataforma(20, stage.getHeight()/1.5));
 	//grupoAssets.add(new Plataforma(190, stage.attrs.height/3));
 	grupoAssets.add(new Plataforma(190, stage.getHeight()/3));
-
+	grupoAssets.add(new Plataforma(510, stage.getHeight()/1.6));
+	grupoAssets.add(new Plataforma(830, stage.getHeight()/3.9));
 
 	personaje = new Heroe();
 	personaje.setX(0);
@@ -152,8 +157,51 @@ function aplicarFuerzas()
 	personaje.aplicarGravedad(grav, val_reb);
 }
 
+
+function detectarColPlataformas()
+{
+	var plataformas = grupoAssets.children;  
+	for (i in plataformas)
+	{
+		var plataforma = plataformas[i];
+		if(hit(plataforma,personaje))
+		{
+
+			if (plataforma instanceof Enemigo) //Instanceof verifica de que clase es el archivo 
+				{
+					if(personaje.vy > 2 &&  personaje.getY() < plataforma.getY())//Verificar velocidad de caida y la altura del personaje y plataforma
+					{
+						plataforma.remove();
+						juego.puntaje += 5 ; //Se incrementa el juego en 5 cada vez que se elimine un enmigo
+						console.log(juego.puntaje);
+
+					}else
+					{
+						console.log('Fin del juego');
+					}
+
+
+				}
+			else if(plataforma instanceof Plataforma && personaje.getY() < plataforma.getY() && personaje.vy >=0 ) //Las cordenadas 0 de Y estan arriba //vy velocidad de caida del personaje
+			{
+				//Comportamiento
+				personaje.contador = 0; //el contador ayuda con la caida del personaje
+				personaje.setY(plataforma.getY() - personaje.getHeight()); //Dejas al personaje excacta,ente arriba de la plataforma
+				personaje.vy *=val_reb; //Valor del rebote es 0
+
+			}
+		}
+	}
+	
+}
+
+
 addKeyBoardEvents();
 nivelUno();
+
+
+
+
 
 
 intv = setInterval(frameLoop, 1000/20);
@@ -161,6 +209,7 @@ intv = setInterval(frameLoop, 1000/20);
 function frameLoop ()
 {
 	aplicarFuerzas();
+	detectarColPlataformas();
 	moverPersonaje();
 	moverEnemigos();
 	stage.draw();
