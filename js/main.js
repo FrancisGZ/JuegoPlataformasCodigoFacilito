@@ -1,12 +1,10 @@
-	var stage, fondo, grupoAssets;
+var stage, fondo, puntaje,grupoAssets;
 var keyboard = {};
 var intv;
 var personaje;
 var grav = 0.8;
 var val_reb = 0; //Calor de rebote valor negativo para agregar rebote
 var juego = new Game() ;
-
-
 
 grupoAssets = new Kinetic.Group({
 	x:0,
@@ -20,11 +18,30 @@ stage = new Kinetic.Stage({
 	
 });  
 
+
+
+
+puntaje = new Kinetic.Text({
+	text:'Puutaje: 0',
+	height: 25,
+	width: 150,
+	x: stage.getWidth() - 150,
+	y: 0,
+	fill: '#222',
+	fontFamily: 'Arial',
+	fontSize: 20
+});
+
+
+
+
 function nivelUno(){
 	
 	juego.puntaje=0;
 
 	fondo = new Kinetic.Layer();
+
+
 
 	/*Enemigos*/
 	grupoAssets.add(new Enemigo(200, stage.getHeight()-75));
@@ -45,6 +62,11 @@ function nivelUno(){
 	grupoAssets.add(new Plataforma(510, stage.getHeight()/1.6));
 	grupoAssets.add(new Plataforma(830, stage.getHeight()/3.9));
 
+
+	/*Monedas*/
+	grupoAssets.add(new Moneda(350, stage.getHeight()/3-130));
+
+
 	personaje = new Heroe();
 	personaje.setX(0);
 	personaje.setY(stage.getHeight()-personaje.getHeight());//Se resta al alto del canvas el alto del personaje
@@ -52,6 +74,7 @@ function nivelUno(){
 	personaje.limiteTope = stage.getHeight();
 	fondo.add(personaje);
 	fondo.add(grupoAssets); //agregar enemigos
+	fondo.add(puntaje);
 	stage.add(fondo);
 }
 
@@ -173,7 +196,8 @@ function detectarColPlataformas()
 					{
 						plataforma.remove();
 						juego.puntaje += 5 ; //Se incrementa el juego en 5 cada vez que se elimine un enmigo
-						console.log(juego.puntaje);
+						//console.log(juego.puntaje);
+					
 
 					}else
 					{
@@ -183,25 +207,34 @@ function detectarColPlataformas()
 
 				}
 			else if(plataforma instanceof Plataforma && personaje.getY() < plataforma.getY() && personaje.vy >=0 ) //Las cordenadas 0 de Y estan arriba //vy velocidad de caida del personaje
-			{
-				//Comportamiento
-				personaje.contador = 0; //el contador ayuda con la caida del personaje
-				personaje.setY(plataforma.getY() - personaje.getHeight()); //Dejas al personaje excacta,ente arriba de la plataforma
-				personaje.vy *=val_reb; //Valor del rebote es 0
+				{
+					//Comportamiento
+					personaje.contador = 0; //el contador ayuda con la caida del personaje
+					personaje.setY(plataforma.getY() - personaje.getHeight()); //Dejas al personaje excacta,ente arriba de la plataforma
+					personaje.vy *=val_reb; //Valor del rebote es 0
 
-			}
+				}
+			else if (plataforma instanceof Moneda) //si la plataforma con la que hizo colision es moneda
+				{	
+					plataforma.remove();
+					juego.puntaje ++;	
+					
+				}
 		}
 	}
 	
 }
 
 
-addKeyBoardEvents();
+function actualizarTexto()
+{
+	puntaje.setText('Puntaje: '+ juego.puntaje);
+}
+
+
+
 nivelUno();
-
-
-
-
+addKeyBoardEvents();
 
 
 intv = setInterval(frameLoop, 1000/20);
@@ -213,4 +246,5 @@ function frameLoop ()
 	moverPersonaje();
 	moverEnemigos();
 	stage.draw();
+	actualizarTexto();
 }
